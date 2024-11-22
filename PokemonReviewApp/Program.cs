@@ -1,13 +1,36 @@
+using Microsoft.EntityFrameworkCore;
+using PokemonReviewApp;
+using PokemonReviewApp.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddTransient<Seed>(); //DependencyInjection: This provides Seed as a service to Program.cs
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Register our DbContext class in our DI Container (builder.services), configure it to use SqlServer, and provide Connection string from config file.
+builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 var app = builder.Build();
+
+if (args.Length == 1 && args[0].ToLower() == "seeddata") //Args refers to arguments passed when running program.cs, dotnet run args
+    SeedData(app);
+
+void SeedData(IHost app) //Method to actually seed our database with data 
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopedFactory.CreateScope())
+    {
+        //Injecting our Seed service via GetService, and using its SeedDataContext to save its data to the given context
+        var service = scope.ServiceProvider.GetService<Seed>(); //Grab Seed service provided earlier
+        service.SeedDataContext(); //Execute seed's SeedDataContext method, which actually seeds DB with data.
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
