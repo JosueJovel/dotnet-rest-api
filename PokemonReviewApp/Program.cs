@@ -1,14 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using PokemonReviewApp;
 using PokemonReviewApp.Data;
+using PokemonReviewApp.Interfaces;
+using PokemonReviewApp.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+
 builder.Services.AddControllers();
 builder.Services.AddTransient<Seed>(); //DependencyInjection: This provides Seed as a service to Program.cs
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddScoped<IPokemonRepository, PokemonRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
