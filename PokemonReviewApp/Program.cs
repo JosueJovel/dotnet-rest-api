@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddTransient<Seed>(); //DependencyInjection: This provides Seed as a service to Program.cs
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//Register our auto mapper as a service for our app
 builder.Services.AddScoped<IPokemonRepository, PokemonRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
