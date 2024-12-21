@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
 
@@ -10,22 +12,28 @@ namespace PokemonReviewApp.Controllers
     public class PokemonController : Controller //This controller class INHERITS the base controller class
     {
         private readonly IPokemonRepository _pokemonRepository;
+        private readonly IMapper _mapper; //Import mapper, made available for injection as a service in Program.Cs
 
-        public PokemonController(IPokemonRepository pokemonRepository)//Inject IPokemonRepository
+        //Inject IPokemonRepository and automapper, constructor dependency injection
+        public PokemonController(IPokemonRepository pokemonRepository, IMapper mapper)
         {
             this._pokemonRepository = pokemonRepository;
+            this._mapper = mapper;
         }
 
         //CONTROLLER ENDPOINT
         [HttpGet]//Http Get Annotation
         [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))] //Annotation determing response type
         public IActionResult GetPokemons() //Controller endpoint method
+        //NOTE ON IACTIONRESULT: It is a return type used to support methods like BadRequest, Ok, NotFound
+        //Used to more easily control the kind of reponses we end (Ok, BadRequest, NotFound)
         {
-            var pokemons = _pokemonRepository.GetPokemons(); //Using our repository, not our data context (loose coupling)
+            //Using our repository, not our data context (loose coupling).
+            var pokemons = _mapper.Map<List<PokemonDto>>(_pokemonRepository.GetPokemons()); //Use automapper to map pokemon to PokemonDto
             //Typically, we would also use a service method that would actually call the repository method.
 
             //Checking ModelState, to validate our fetched data
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) //Centralized method of data validation
             {
                 return BadRequest(ModelState);
             }
@@ -33,5 +41,43 @@ namespace PokemonReviewApp.Controllers
             return Ok(pokemons); //As an endpoint resposne, prvoide Status code 200 OK, and the requested data (pokemon list)
         }
 
+        [HttpGet("{pokeId}")] //endpoint URL extension from our base of "api/[controller]" NOTE: {} are used to mark path variables, just like in spring boot
+        [ProducesResponseType(200, Type = typeof(Pokemon))] //Annotation determing response type
+        [ProducesResponseType(400)]
+        public IActionResult GetPokemon(int pokeId) //Endpoint to return a single pokemon
+        {
+            if (!_pokemonRepository.PokemonExists(pokeId)) return NotFound(); //repository validation
+
+            //Using our implemented repository method to fetch a specific pokemon entity by id
+            var pokemon = _mapper.Map<PokemonDto>(_pokemonRepository.GetPokemon(pokeId));//Use automapper to map pokemon to PokemonDto
+
+            //This validates that our incoming requests' values are valid against a DTO's [requirements] (like name being required)
+            //Another ex: Our DTO has a pokedex number porpertiy with [Range(1-100)], and the incoming pokedex number is 200
+            if (!ModelState.IsValid) 
+            {
+                return BadRequest(ModelState);
+            }
+
+            return Ok(pokemon);
+        }
+
+        [HttpGet("{pokeId}/rating")] //endpoint URL extension from our base of "api/[controller]"
+        [ProducesResponseType(200, Type = typeof(decimal))] //Annotation determing response type
+        [ProducesResponseType(400)]
+        public IActionResult GetPokemonRating(int pokeId)
+        {
+            if (!_pokemonRepository.PokemonExists(pokeId)) return NotFound(); //repository validation
+
+            //Using our repository method that calculates an average rating
+            decimal rating = _pokemonRepository.GetPokemonRating(pokeId);
+
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return Ok(rating);
+        }
     }
 }
