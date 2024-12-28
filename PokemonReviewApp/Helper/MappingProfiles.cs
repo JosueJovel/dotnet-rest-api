@@ -9,6 +9,7 @@ namespace PokemonReviewApp.Helper
         public MappingProfiles() 
         {
             CreateMap<Pokemon, PokemonDto>(); //Create a mapping between Pokemon and PokemonDto. Fields are name matched
+            CreateMap<Category, CategoryDto>();
         }
     }
 }
