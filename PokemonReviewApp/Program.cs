@@ -15,6 +15,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//Regist
 builder.Services.AddScoped<IPokemonRepository, PokemonRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
 builder.Services.AddScoped<ICountryRepository, CountryRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
+builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
