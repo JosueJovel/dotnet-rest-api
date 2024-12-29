@@ -23,7 +23,7 @@ namespace PokemonReviewApp.Controllers
         //Get endpoint
         [HttpGet]//Http Get Annotation
         [ProducesResponseType(200, Type = typeof(IEnumerable<Category>))] //Annotation determing response type
-        public IActionResult GetCategories(int id)
+        public IActionResult GetCategories()
         {
             var categories = _mapper.Map<List<CategoryDto>>(_categoryRepository.GetCategories());
             if (!ModelState.IsValid)

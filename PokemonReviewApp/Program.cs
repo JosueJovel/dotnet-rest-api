@@ -12,10 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddTransient<Seed>(); //DependencyInjection: This provides Seed as a service to Program.cs
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//Register our auto mapper as a service for our app
-builder.Services.AddScoped<IPokemonRepository, PokemonRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
-builder.Services.AddScoped<ICountryRepository, CountryRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
-builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();//Register our repo interface as an injectable service, and provides the actual repo for injection
+builder.Services.AddScoped<IPokemonRepository, PokemonRepository>(); //Register our repo interface as an injectable service, and provides the actual repo for injection
+builder.Services.AddScoped<ICountryRepository, CountryRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
