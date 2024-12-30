@@ -9,5 +9,8 @@ namespace PokemonReviewApp.Interfaces
         ICollection<Pokemon> GetPokemonByCategory(int categoryId);//Query to fetch all pokemons with a specified category id
         bool CategoryExists(int id);
 
+        bool CreateCategory(Category category); //CREATEE repository method signature
+        bool Save();
+
     }
 }

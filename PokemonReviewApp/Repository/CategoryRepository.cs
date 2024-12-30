@@ -18,6 +18,14 @@ namespace PokemonReviewApp.Repository
             return _context.Categories.Any(c => c.Id == id); //Any == "exists", just a bool to check if exists.
         }
 
+        public bool CreateCategory(Category category)
+        {
+            //DB transactions
+            _context.Add(category);
+
+            return Save(); //Formally submit your DB Transaction
+        }
+
         public ICollection<Category> GetCategories()
         {
             //"Categories" itself is the whole table, now we simple turn that table into a list.
@@ -43,6 +51,12 @@ namespace PokemonReviewApp.Repository
             //EX: When we say "Select(c => c.Pokemon)",
             //EF reads "Select Pokemon.Id, Pokemon.Name, Pokemon.type.... FROM PokemonCategories INNER JOIN Pokemon)
             //Without Select, we would get EVERYTHING, including nulls from other entities not being in the DB
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges(); //Formally write/send stored changes/db transaction to the db.
+            return saved > 0 ? true : false;
         }
     }
 }

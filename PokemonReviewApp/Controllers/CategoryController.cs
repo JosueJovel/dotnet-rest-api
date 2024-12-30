@@ -4,6 +4,7 @@ using PokemonReviewApp.Data;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
+using PokemonReviewApp.Services;
 
 namespace PokemonReviewApp.Controllers
 {
@@ -13,11 +14,13 @@ namespace PokemonReviewApp.Controllers
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
+        private readonly CategoryService _categoryService;
 
-        public CategoryController(ICategoryRepository categoryRepository, IMapper mapper) //Constructor inject dependencies
+        public CategoryController(ICategoryRepository categoryRepository, IMapper mapper, CategoryService categoryService) //Constructor inject dependencies
         {
             this._categoryRepository = categoryRepository;
             this._mapper = mapper;
+            this._categoryService = categoryService;
         }
 
         //Get endpoint
@@ -60,5 +63,40 @@ namespace PokemonReviewApp.Controllers
             }
             return Ok(pokemons);//Return IActionResult type with our query
         }
+
+        [HttpPost()]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateCategory([FromBody] CategoryDto categoryCreate) //From body is used to grab the request body, equivalent to @RequestBody
+        {
+            if(categoryCreate == null) return BadRequest(ModelState);
+            //Send categoryDto to service
+
+
+            bool nameMatch = _categoryService.CategoryNameExists(categoryCreate);
+
+            if (nameMatch) //If there was a name match found
+            {
+                ModelState.AddModelError("", "Category already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Finally, we have fully verified request is valid. save to repository.
+            bool categorySaved = _categoryService.SaveCategoryToDb(categoryCreate);
+            if (!categorySaved) //If category was unable to be saved
+            {
+                ModelState.AddModelError("", "Something went wrong saving the category");
+                return StatusCode(500, ModelState);
+            }
+
+
+            return Ok("Successfully created");
+        }
+
     }
 }
