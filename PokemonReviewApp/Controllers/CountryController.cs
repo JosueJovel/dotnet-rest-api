@@ -4,6 +4,7 @@ using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
 using PokemonReviewApp.Repository;
+using PokemonReviewApp.Services;
 
 namespace PokemonReviewApp.Controllers
 {
@@ -13,12 +14,14 @@ namespace PokemonReviewApp.Controllers
     {
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper; //Import mapper, made available for injection as a service in Program.Cs
+        private readonly CountryService _countryService;
 
         //Inject IPokemonRepository and automapper, constructor dependency injection
-        public CountryController(ICountryRepository countryRepository, IMapper mapper)
+        public CountryController(ICountryRepository countryRepository, IMapper mapper, CountryService countryService)
         {
             this._countryRepository = countryRepository;
             this._mapper = mapper;
+            this._countryService = countryService;
         }
 
         //CONTROLLER ENDPOINT
@@ -68,6 +71,38 @@ namespace PokemonReviewApp.Controllers
                 return BadRequest(ModelState);
             }
             return Ok(country);
+        }
+
+        [HttpPost()]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateCountry([FromBody] CountryDto countryCreate) //From body is used to grab the request body, equivalent to @RequestBody
+        {
+            if (countryCreate == null) return BadRequest(ModelState); //Reject empty request bodies
+            bool nameMatch = _countryService.CountryNameExists(countryCreate); //Send CountryDto to service
+
+
+            if (nameMatch) //If there was a name match found
+            {
+                ModelState.AddModelError("", "Country already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Finally, we have fully verified request is valid. save to repository.
+            bool countrySaved = _countryService.SaveCountryToDb(countryCreate);
+            if (!countrySaved) //If Country was unable to be saved
+            {
+                ModelState.AddModelError("", "Something went wrong saving the Country");
+                return StatusCode(500, ModelState);
+            }
+
+
+            return Ok("Successfully created");
         }
     }
 

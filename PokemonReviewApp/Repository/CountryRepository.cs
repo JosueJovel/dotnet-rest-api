@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PokemonReviewApp.Data;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
@@ -19,6 +20,14 @@ namespace PokemonReviewApp.Repository
         {
             //Grab all of our countries from our data context DBSet. Then apply the "Any" LINQ method to that set.
             return _dataContext.Countries.Any(country => country.Id == id);
+        }
+
+        public bool CreateCountry(Country country)
+        {
+            //DB transactions
+            _dataContext.Add(country);
+
+            return Save(); //Formally submit your DB Transaction
         }
 
         public ICollection<Country> GetCountries()
@@ -47,6 +56,12 @@ namespace PokemonReviewApp.Repository
             //one, greater List of Owners
 
             //return _dataContext.Owners.Where(c => c.Country.Id == countryId).ToList();
+        }
+
+        public bool Save()
+        {
+            var saved = _dataContext.SaveChanges(); //Formally write/send stored changes/db transaction to the db.
+            return saved > 0 ? true : false;
         }
     }
 }

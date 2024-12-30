@@ -15,6 +15,7 @@ namespace PokemonReviewApp.Helper
             CreateMap<Review, ReviewDto>();
             CreateMap<Reviewer, ReviewerDto>();
             CreateMap<CategoryDto, Category>(); //Mapping from Dto to Entity, usually for mapping request bodies
+            CreateMap<CountryDto, Country>();
         }
     }
 }
