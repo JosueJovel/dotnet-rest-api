@@ -4,6 +4,7 @@ using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
 using PokemonReviewApp.Repository;
+using PokemonReviewApp.Services;
 
 namespace PokemonReviewApp.Controllers
 {
@@ -13,11 +14,13 @@ namespace PokemonReviewApp.Controllers
     {
         private readonly IReviewerRepository _reviewerRepository;
         private readonly IMapper _mapper;
+        private readonly ReviewerService _reviewerService;
 
-        public ReviewerController(IReviewerRepository reviewerRepository, IMapper mapper)
+        public ReviewerController(IReviewerRepository reviewerRepository, IMapper mapper, ReviewerService reviewerService)
         {
             this._reviewerRepository = reviewerRepository;
             this._mapper = mapper;
+            this._reviewerService = reviewerService;
         }
 
         //CONTROLLER ENDPOINT
@@ -65,6 +68,37 @@ namespace PokemonReviewApp.Controllers
             }
 
             return Ok(reviewerReviews);
+        }
+        [HttpPost()]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReviewer([FromBody] ReviewerDto reviewerCreate) //From body is used to grab the request body, equivalent to @RequestBody
+        {
+            if (reviewerCreate == null) return BadRequest(ModelState); //Reject empty request bodies
+            bool nameMatch = _reviewerService.ReviewerNameExists(reviewerCreate); //Send ReviewerDto to service
+
+
+            if (nameMatch) //If there was a name match found
+            {
+                ModelState.AddModelError("", "Reviewer already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Finally, we have fully verified request is valid. save to repository.
+            bool reviewerSaved = _reviewerService.SaveReviewerToDb(reviewerCreate);
+            if (!reviewerSaved) //If Reviewer was unable to be saved
+            {
+                ModelState.AddModelError("", "Something went wrong saving the Reviewer");
+                return StatusCode(500, ModelState);
+            }
+
+
+            return Ok("Successfully created");
         }
     }
 }

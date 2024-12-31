@@ -24,6 +24,7 @@ builder.Services.AddScoped<CountryService>();
 builder.Services.AddScoped<OwnerService>();
 builder.Services.AddScoped<PokemonService>();
 builder.Services.AddScoped<ReviewService>();
+builder.Services.AddScoped<ReviewerService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
