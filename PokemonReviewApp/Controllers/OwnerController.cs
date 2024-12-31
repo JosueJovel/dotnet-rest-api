@@ -4,6 +4,7 @@ using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
 using PokemonReviewApp.Repository;
+using PokemonReviewApp.Services;
 
 namespace PokemonReviewApp.Controllers
 {
@@ -13,11 +14,13 @@ namespace PokemonReviewApp.Controllers
     {
         private readonly IOwnerRepository _ownerRepository;
         private readonly IMapper _mapper;
+        private readonly OwnerService _ownerService;
 
-        public OwnerController(IOwnerRepository ownerRepository, IMapper mapper)
+        public OwnerController(IOwnerRepository ownerRepository, IMapper mapper, OwnerService ownerService)
         {
             this._ownerRepository = ownerRepository;
             this._mapper = mapper;
+            this._ownerService = ownerService;
         }
 
         //CONTROLLER ENDPOINT
@@ -69,6 +72,38 @@ namespace PokemonReviewApp.Controllers
             }
 
             return Ok(ownerPokemons);
+        }
+
+        [HttpPost()]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateOwner([FromBody] OwnerDto ownerCreate, [FromQuery] int countryId) //From body is used to grab the request body, equivalent to @RequestBody
+        {
+            if (ownerCreate == null) return BadRequest(ModelState); //Reject empty request bodies
+            bool nameMatch = _ownerService.OwnerNameExists(ownerCreate); //Send OwnerDto to service
+
+
+            if (nameMatch) //If there was a name match found
+            {
+                ModelState.AddModelError("", "Owner already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Finally, we have fully verified request is valid. save to repository.
+            bool ownerSaved = _ownerService.SaveOwnerToDb(ownerCreate, countryId);
+            if (!ownerSaved) //If Owner was unable to be saved
+            {
+                ModelState.AddModelError("", "Something went wrong saving the Owner");
+                return StatusCode(500, ModelState);
+            }
+
+
+            return Ok("Successfully created");
         }
     }
 }

@@ -21,6 +21,7 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewerRepository, ReviewerRepository>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<CountryService>();
+builder.Services.AddScoped<OwnerService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

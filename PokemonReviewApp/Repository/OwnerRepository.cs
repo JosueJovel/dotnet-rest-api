@@ -36,5 +36,18 @@ namespace PokemonReviewApp.Repository
             return _context.PokemonOwners.Where(po => po.OwnerId == ownerId).Select(po => po.Pokemon).ToList();
         }
 
+        public bool CreateOwner(Owner owner)
+        {
+            //DB transactions
+            _context.Add(owner);
+
+            return Save(); //Formally submit your DB Transaction
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges(); //Formally write/send stored changes/db transaction to the db.
+            return saved > 0 ? true : false;
+        }
     }
 }

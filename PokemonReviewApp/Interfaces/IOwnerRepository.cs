@@ -9,5 +9,8 @@ namespace PokemonReviewApp.Interfaces
         Owner GetOwner(int ownerId);
         ICollection<Owner> GetOwnerOfPokemon(int pokeId);
         ICollection<Pokemon> GetPokemonByOwner(int ownerId);
+
+        bool CreateOwner(Owner owner); //CREATE repository method signature
+        bool Save();
     }
 }
