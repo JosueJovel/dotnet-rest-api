@@ -4,6 +4,7 @@ using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
 using PokemonReviewApp.Repository;
+using PokemonReviewApp.Services;
 
 namespace PokemonReviewApp.Controllers
 {
@@ -14,11 +15,13 @@ namespace PokemonReviewApp.Controllers
     {
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
+        private readonly ReviewService _reviewService;
 
-        public ReviewController(IReviewRepository reviewRepository, IMapper mapper)
+        public ReviewController(IReviewRepository reviewRepository, IMapper mapper, ReviewService reviewService)
         {
             this._reviewRepository = reviewRepository;
             this._mapper = mapper;
+            this._reviewService = reviewService;
         }
 
         //Get endpoint
@@ -63,6 +66,39 @@ namespace PokemonReviewApp.Controllers
             }
 
             return Ok(pokemonReviews);
+        }
+
+
+        [HttpPost()]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReview([FromBody] ReviewDto reviewCreate, [FromQuery] int reviewerId, [FromQuery] int pokeId) //From body is used to grab the request body, equivalent to @RequestBody
+        {
+            if (reviewCreate == null) return BadRequest(ModelState); //Reject empty request bodies
+            bool nameMatch = _reviewService.ReviewNameExists(reviewCreate); //Send ReviewDto to service
+
+
+            if (nameMatch) //If there was a name match found
+            {
+                ModelState.AddModelError("", "Review already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Finally, we have fully verified request is valid. save to repository.
+            bool reviewSaved = _reviewService.SaveReviewToDb(reviewCreate, reviewerId, pokeId);
+            if (!reviewSaved) //If Review was unable to be saved
+            {
+                ModelState.AddModelError("", "Something went wrong saving the Review");
+                return StatusCode(500, ModelState);
+            }
+
+
+            return Ok("Successfully created");
         }
     }
 }
