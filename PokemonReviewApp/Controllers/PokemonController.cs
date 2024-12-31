@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
+using PokemonReviewApp.Services;
 
 namespace PokemonReviewApp.Controllers
 {
@@ -13,12 +14,14 @@ namespace PokemonReviewApp.Controllers
     {
         private readonly IPokemonRepository _pokemonRepository;
         private readonly IMapper _mapper; //Import mapper, made available for injection as a service in Program.Cs
+        private readonly PokemonService _pokemonService;
 
         //Inject IPokemonRepository and automapper, constructor dependency injection
-        public PokemonController(IPokemonRepository pokemonRepository, IMapper mapper)
+        public PokemonController(IPokemonRepository pokemonRepository, IMapper mapper, PokemonService pokemonService)
         {
             this._pokemonRepository = pokemonRepository;
             this._mapper = mapper;
+            this._pokemonService = pokemonService;
         }
 
         //CONTROLLER ENDPOINT
@@ -78,6 +81,38 @@ namespace PokemonReviewApp.Controllers
             }
 
             return Ok(rating);
+        }
+
+        [HttpPost()]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreatePokemon([FromBody] PokemonDto pokemonCreate, [FromQuery] int ownerId, [FromQuery] int categoryId) //From body is used to grab the request body, equivalent to @RequestBody
+        {
+            if (pokemonCreate == null) return BadRequest(ModelState); //Reject empty request bodies
+            bool nameMatch = _pokemonService.PokemonNameExists(pokemonCreate); //Send PokemonDto to service
+
+
+            if (nameMatch) //If there was a name match found
+            {
+                ModelState.AddModelError("", "Pokemon already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Finally, we have fully verified request is valid. save to repository.
+            bool pokemonSaved = _pokemonService.SavePokemonToDb(pokemonCreate, ownerId, categoryId);
+            if (!pokemonSaved) //If Pokemon was unable to be saved
+            {
+                ModelState.AddModelError("", "Something went wrong saving the Pokemon");
+                return StatusCode(500, ModelState);
+            }
+
+
+            return Ok("Successfully created");
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using PokemonReviewApp.Data;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
+using System.Linq;
 
 namespace PokemonReviewApp.Repository
 {
@@ -11,6 +12,32 @@ namespace PokemonReviewApp.Repository
         public PokemonRepository(DataContext context) //DataContext constructor injection
         {
             this._context = context;
+        }
+
+        public bool CreatePokemon(Pokemon pokemon, int ownerId, int categoryId)
+        {
+            Pokemon newPokemon = pokemon;
+            Owner newOwner = _context.Owners.Where(po => po.Id == ownerId).FirstOrDefault();
+            Category category = _context.Categories.Where(c => c.Id == categoryId).FirstOrDefault();
+
+            //Because its a MANY TO MANY realtionship, we need to construct the new entry on the many to many table first, THENN reference it wihtin our new pokemon.
+            PokemonOwner newPokemonOwner = new() //our new pokemon owner, this creates the associatoin between PokemonOwner and Pokemon in the databsae.
+            {
+                Owner = newOwner,
+                Pokemon = newPokemon
+            };
+
+            PokemonCategory newPokemonCategory = new() //our new pokemon owner, this creates the associatoin between PokemonOwner and Pokemon in the databsae.
+            {
+                Category = category,
+                Pokemon = newPokemon
+            };
+
+            _context.Add(newPokemonOwner); //Save our new pokemon owner relationship
+            _context.Add(newPokemonCategory);//Save new pokemon category relationship
+
+            _context.Add(pokemon); //Now that all relationships are correctly build, save pokemon
+            return Save();
         }
 
         public Pokemon GetPokemon(int id) //Repository method for fetching a specific pokemon by ID
@@ -53,6 +80,12 @@ namespace PokemonReviewApp.Repository
         public bool PokemonExists(int pokeId)
         {
             return _context.Pokemon.Any(p => p.Id == pokeId);//Using the Any LINQ method to verify if a certain pokemon exists or not
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges(); //Formally write/send stored changes/db transaction to the db.
+            return saved > 0 ? true : false;
         }
     }
 }
