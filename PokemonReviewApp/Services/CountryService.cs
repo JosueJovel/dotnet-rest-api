@@ -40,5 +40,12 @@ namespace PokemonReviewApp.Services
             else return false;
         }
 
+        public bool UpdateCountryToDb(CountryDto countryDtoUpdate)
+        {
+            if (_countryRepository.CountryExists(countryDtoUpdate.Id) == false) return false;
+            Country countryUpdate = _mapper.Map<Country>(countryDtoUpdate);
+            bool saved = _countryRepository.UpdateCountry(countryUpdate);
+            return saved;
+        }
     }
 }

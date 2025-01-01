@@ -63,5 +63,12 @@ namespace PokemonReviewApp.Repository
             var saved = _dataContext.SaveChanges(); //Formally write/send stored changes/db transaction to the db.
             return saved > 0 ? true : false;
         }
+
+        public bool UpdateCountry(Country country)
+        {
+            _dataContext.Update(country);
+
+            return Save(); //Formally submit your DB Transaction
+        }
     }
 }

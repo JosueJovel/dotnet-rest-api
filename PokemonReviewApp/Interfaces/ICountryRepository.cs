@@ -12,5 +12,6 @@ namespace PokemonReviewApp.Interfaces
 
         bool CreateCountry(Country country); //CREATE repository method signature
         bool Save();
+        bool UpdateCountry(Country country);
     }
 }
