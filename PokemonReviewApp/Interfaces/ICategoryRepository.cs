@@ -11,6 +11,7 @@ namespace PokemonReviewApp.Interfaces
 
         bool CreateCategory(Category category); //CREATEE repository method signature
         bool Save();
+        bool UpdateCategory(Category category);
 
     }
 }

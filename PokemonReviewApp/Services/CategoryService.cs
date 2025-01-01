@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
@@ -37,6 +38,18 @@ namespace PokemonReviewApp.Services
             {
                 return true;
             } else return false;
+        }
+
+        public bool UpdateCategoryToDb(CategoryDto categoryUpdate)
+        {
+            //check if entry exists with this id
+            if (_categoryRepository.CategoryExists(categoryUpdate.Id) == false) return false;
+
+            //If it does, we are good to go
+            Category updatedCategory = _mapper.Map<Category>(categoryUpdate);
+            bool saved = _categoryRepository.UpdateCategory(updatedCategory);
+            return saved; 
+            
         }
 
     }
