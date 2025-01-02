@@ -10,5 +10,6 @@ namespace PokemonReviewApp.Interfaces
         bool ReviewerExists(int reviewerId);
         bool CreateReviewer(Reviewer reviewer); //CREATE repository method signature
         bool Save();
+        bool UpdateReviewer(Reviewer reviewer);
     }
 }
