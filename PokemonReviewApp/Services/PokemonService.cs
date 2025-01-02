@@ -45,5 +45,13 @@ namespace PokemonReviewApp.Services
             else return false;
         }
 
+        internal bool UpdatePokemonToDb(PokemonDto pokemonUpdate)
+        {
+            Pokemon oldPokemon = _pokemonRepository.GetPokemon(pokemonUpdate.Id);
+            if (oldPokemon == null) return false;
+            _mapper.Map(pokemonUpdate, oldPokemon);
+            bool saved = _pokemonRepository.UpdatePokemon(oldPokemon);
+            return saved;
+        }
     }
 }

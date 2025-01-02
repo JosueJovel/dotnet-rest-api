@@ -11,5 +11,6 @@ namespace PokemonReviewApp.Interfaces
         bool PokemonExists(int pokeId); //Interface method for checking if a pokemon exists in the DB, given a pokemon ID
         bool CreatePokemon(Pokemon pokemon, int ownerId, int categoryId); //CREATE repository method signature
         bool Save();
+        bool UpdatePokemon(Pokemon pokemon);
     }
 }
