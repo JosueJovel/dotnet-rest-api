@@ -49,5 +49,11 @@ namespace PokemonReviewApp.Repository
             var saved = _context.SaveChanges(); //Formally write/send stored changes/db transaction to the db.
             return saved > 0 ? true : false;
         }
+
+        public bool UpdateOwner(Owner owner)
+        {
+            _context.Update(owner);
+            return Save();
+        }
     }
 }

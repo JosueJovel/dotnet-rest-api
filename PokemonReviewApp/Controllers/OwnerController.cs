@@ -77,7 +77,7 @@ namespace PokemonReviewApp.Controllers
         [HttpPost()]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateOwner([FromBody] OwnerDto ownerCreate, [FromQuery] int countryId) //From body is used to grab the request body, equivalent to @RequestBody
+        public IActionResult CreateOwner([FromBody] OwnerDto ownerCreate, [FromQuery] int ownerId) //From body is used to grab the request body, equivalent to @RequestBody
         {
             if (ownerCreate == null) return BadRequest(ModelState); //Reject empty request bodies
             bool nameMatch = _ownerService.OwnerNameExists(ownerCreate); //Send OwnerDto to service
@@ -95,7 +95,7 @@ namespace PokemonReviewApp.Controllers
             }
 
             //Finally, we have fully verified request is valid. save to repository.
-            bool ownerSaved = _ownerService.SaveOwnerToDb(ownerCreate, countryId);
+            bool ownerSaved = _ownerService.SaveOwnerToDb(ownerCreate, ownerId);
             if (!ownerSaved) //If Owner was unable to be saved
             {
                 ModelState.AddModelError("", "Something went wrong saving the Owner");
@@ -105,5 +105,25 @@ namespace PokemonReviewApp.Controllers
 
             return Ok("Successfully created");
         }
+        [HttpPut("{ownerId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateOwner(int ownerId, [FromBody] OwnerDto ownerUpdate)
+        {
+            if (ownerUpdate == null) return BadRequest(ModelState);
+            if (ownerUpdate.Id != ownerId) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+
+            bool saved = _ownerService.UpdateOwnerToDb(ownerUpdate);
+            if (!saved)
+            {
+                ModelState.AddModelError("", "Something went wrong updating the owner");
+                return StatusCode(500, ModelState);
+            }
+            return NoContent();
+        }
+
     }
 }

@@ -12,5 +12,6 @@ namespace PokemonReviewApp.Interfaces
 
         bool CreateOwner(Owner owner); //CREATE repository method signature
         bool Save();
+        bool UpdateOwner(Owner owner);
     }
 }
