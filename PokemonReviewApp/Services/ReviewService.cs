@@ -51,5 +51,12 @@ namespace PokemonReviewApp.Services
 
         }
 
+        public bool UpdateReviewToDb(ReviewDto reviewUpdate)
+        {
+            Review oldReview = _reviewRepository.GetReview(reviewUpdate.Id);
+            _mapper.Map(reviewUpdate, oldReview);
+            bool saved = _reviewRepository.UpdateReview(oldReview);
+            return saved;
+        }
     }
 }

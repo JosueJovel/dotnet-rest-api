@@ -45,5 +45,11 @@ namespace PokemonReviewApp.Repository
             var saved = _dataContext.SaveChanges(); //Formally write/send stored changes/db transaction to the db.
             return saved > 0 ? true : false;
         }
+
+        public bool UpdateReview(Review review)
+        {
+            _dataContext.Update(review);
+            return Save();
+        }
     }
 }

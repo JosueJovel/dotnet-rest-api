@@ -44,7 +44,7 @@ namespace PokemonReviewApp.Services
 
         }
 
-        internal bool UpdateReviewerToDb(ReviewerDto reviewerUpdate)
+        public bool UpdateReviewerToDb(ReviewerDto reviewerUpdate)
         {
             Reviewer oldReviewer = _reviewerRepository.GetReviewer(reviewerUpdate.Id);
             _mapper.Map(reviewerUpdate, oldReviewer);

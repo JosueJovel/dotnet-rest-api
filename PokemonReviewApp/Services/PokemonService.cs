@@ -45,7 +45,7 @@ namespace PokemonReviewApp.Services
             else return false;
         }
 
-        internal bool UpdatePokemonToDb(PokemonDto pokemonUpdate)
+        public bool UpdatePokemonToDb(PokemonDto pokemonUpdate)
         {
             Pokemon oldPokemon = _pokemonRepository.GetPokemon(pokemonUpdate.Id);
             if (oldPokemon == null) return false;

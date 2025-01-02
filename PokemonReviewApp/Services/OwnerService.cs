@@ -57,7 +57,7 @@ namespace PokemonReviewApp.Services
             else return false;
         }
 
-        internal bool UpdateOwnerToDb(OwnerDto ownerUpdate)
+        public bool UpdateOwnerToDb(OwnerDto ownerUpdate)
         {
             var dbOwner = _ownerRepository.GetOwner(ownerUpdate.Id); //Get the ownwer we are updating from DB
             if (dbOwner != null) //If owner does indeed exist
