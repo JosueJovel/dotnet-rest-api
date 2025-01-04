@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PokemonReviewApp.Data;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
@@ -9,11 +11,13 @@ namespace PokemonReviewApp.Services
     {
         private readonly IMapper _mapper;
         private IReviewerRepository _reviewerRepository;
+        private readonly DataContext _context;
 
-        public ReviewerService(IMapper mapper, IReviewerRepository reviewerRepository)
+        public ReviewerService(IMapper mapper, IReviewerRepository reviewerRepository, DataContext context)
         {
             this._mapper = mapper;
             this._reviewerRepository = reviewerRepository;
+            this._context = context;
         }
 
         public bool ReviewerNameExists(ReviewerDto ReviewerDto)
@@ -50,6 +54,16 @@ namespace PokemonReviewApp.Services
             _mapper.Map(reviewerUpdate, oldReviewer);
             bool saved = _reviewerRepository.UpdateReviewer(oldReviewer);
             return saved;
+        }
+
+
+        public bool DeleteReviewer(int reviewerId)
+        {
+            if (!_reviewerRepository.ReviewerExists(reviewerId)) return false;
+            Reviewer reviewer = _context.Reviewers.Include(r => r.Reviews)
+                .FirstOrDefault(c => c.Id == reviewerId);//Fetch relevant category along with all its dependencies
+            if (reviewer.Reviews.Any()) return false; //Do not delete categories with dependent data (delete dependencies first)
+            return _reviewerRepository.DeleteReviewer(reviewer);
         }
     }
 }
