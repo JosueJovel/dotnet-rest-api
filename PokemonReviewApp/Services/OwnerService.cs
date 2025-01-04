@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PokemonReviewApp.Data;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
@@ -11,13 +13,15 @@ namespace PokemonReviewApp.Services
         private readonly IMapper _mapper;
         private readonly ICountryRepository _countryRepository;
         private readonly CountryService _countryService;
+        private readonly DataContext _context;
 
-        public OwnerService(IOwnerRepository OwnerRepository, IMapper mapper, ICountryRepository countryRepository, CountryService countryService)
+        public OwnerService(IOwnerRepository OwnerRepository, IMapper mapper, ICountryRepository countryRepository, CountryService countryService, DataContext context)
         {
             this._ownerRepository = OwnerRepository;
             this._mapper = mapper;
             this._countryRepository = countryRepository;
             this._countryService = countryService;
+            this._context = context;
         }
 
         public bool OwnerNameExists(OwnerDto OwnerDto)
@@ -67,6 +71,16 @@ namespace PokemonReviewApp.Services
             }
             var saved = _ownerRepository.UpdateOwner(dbOwner); //save this owner into DB
             return saved;
+        }
+
+        internal bool DeleteOwner(int ownerId)
+        {
+            if (!_ownerRepository.OwnerExists(ownerId)) return false;
+            Owner owner = _context.Owners
+                .Include(o => o.PokemonOwners)
+                .FirstOrDefault(c => c.Id == ownerId);//Fetch relevant category along with all its dependencies
+            if (owner.PokemonOwners.Any()) return false; //Do not delete categories with dependent data (delete dependencies first)
+            return _ownerRepository.DeleteOwner(owner);
         }
     }
 }
