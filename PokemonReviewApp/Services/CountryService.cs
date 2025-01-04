@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PokemonReviewApp.Data;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
@@ -9,11 +11,13 @@ namespace PokemonReviewApp.Services
     {
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
+        private readonly DataContext _context;
 
-        public CountryService(ICountryRepository CountryRepository, IMapper mapper)
+        public CountryService(ICountryRepository CountryRepository, IMapper mapper, DataContext context)
         {
             this._countryRepository = CountryRepository;
             this._mapper = mapper;
+            this._context = context;
         }
 
         public bool CountryNameExists(CountryDto CountryDto)
@@ -46,6 +50,16 @@ namespace PokemonReviewApp.Services
             Country countryUpdate = _mapper.Map<Country>(countryDtoUpdate);
             bool saved = _countryRepository.UpdateCountry(countryUpdate);
             return saved;
+        }
+
+        internal bool DeleteCountry(int countryId)
+        {
+            if(_countryRepository.CountryExists(countryId) == false) { return false; } //Cant delete something that doesnt exist
+            Country countryToDelete = _context.Countries //Fetch relevant category along with all its dependencies
+                .Include(c => c.Owners)
+                .FirstOrDefault(c => c.Id == countryId);
+            if (countryToDelete.Owners.Any()) { return false; } //Do not delete categories with dependent data (delete dependencies first)
+            return _countryRepository.DeleteCountry(countryToDelete);
         }
     }
 }
