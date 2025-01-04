@@ -40,6 +40,11 @@ namespace PokemonReviewApp.Repository
             return Save();
         }
 
+        public bool DeletePokemon(Pokemon pokemon)
+        {
+            throw new NotImplementedException();
+        }
+
         public Pokemon GetPokemon(int id) //Repository method for fetching a specific pokemon by ID
         {
             return _context.Pokemon.Where(p => p.Id == id).FirstOrDefault(); //Executing Where Query, return first pkemon result or default value

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PokemonReviewApp.Data;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
@@ -11,13 +13,15 @@ namespace PokemonReviewApp.Services
         private readonly IMapper _mapper;
         private readonly ICountryRepository _countryRepository;
         private readonly CountryService _countryService;
+        private readonly DataContext _context;
 
-        public PokemonService(IPokemonRepository PokemonRepository, IMapper mapper, ICountryRepository countryRepository, CountryService countryService)
+        public PokemonService(IPokemonRepository PokemonRepository, IMapper mapper, ICountryRepository countryRepository, CountryService countryService, DataContext context)
         {
             this._pokemonRepository = PokemonRepository;
             this._mapper = mapper;
             this._countryRepository = countryRepository;
             this._countryService = countryService;
+            this._context = context;
         }
 
         public bool PokemonNameExists(PokemonDto PokemonDto)
@@ -52,6 +56,16 @@ namespace PokemonReviewApp.Services
             _mapper.Map(pokemonUpdate, oldPokemon);
             bool saved = _pokemonRepository.UpdatePokemon(oldPokemon);
             return saved;
+        }
+
+        internal bool DeletePokemon(int pokemonId)
+        {
+            if (_pokemonRepository.PokemonExists(pokemonId)) return false;
+            Pokemon pokemon = _context.Pokemon //Bring in pokemon + its dependencies
+                .Include(p => p.PokemonOwners)
+                .FirstOrDefault(p => p.Id == pokemonId);
+            if (pokemon.PokemonOwners.Any() == true || pokemon.PokemonCategories.Any() == true || pokemon.Reviews.Any() == true) return false;
+            return _pokemonRepository.DeletePokemon(pokemon);
         }
     }
 }

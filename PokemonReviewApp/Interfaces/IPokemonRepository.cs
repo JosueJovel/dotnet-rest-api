@@ -12,5 +12,6 @@ namespace PokemonReviewApp.Interfaces
         bool CreatePokemon(Pokemon pokemon, int ownerId, int categoryId); //CREATE repository method signature
         bool Save();
         bool UpdatePokemon(Pokemon pokemon);
+        bool DeletePokemon(Pokemon pokemon);
     }
 }
