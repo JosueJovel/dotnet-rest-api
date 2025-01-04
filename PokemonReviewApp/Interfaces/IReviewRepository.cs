@@ -11,5 +11,6 @@ namespace PokemonReviewApp.Interfaces
         bool CreateReview(Review review); //CREATE repository method signature
         bool Save();
         bool UpdateReview(Review review);
+        bool DeleteReview(Review review);
     }
 }

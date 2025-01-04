@@ -58,5 +58,13 @@ namespace PokemonReviewApp.Services
             bool saved = _reviewRepository.UpdateReview(oldReview);
             return saved;
         }
+
+        internal bool DeleteReview(int reviewId)
+        {
+            if (_reviewRepository.ReviewExists(reviewId) == false) return false;
+            Review reviewToDelete = _reviewRepository.GetReview(reviewId);
+            return _reviewRepository.DeleteReview(reviewToDelete);
+            
+        }
     }
 }
