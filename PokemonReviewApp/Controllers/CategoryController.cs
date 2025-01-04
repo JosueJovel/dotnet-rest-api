@@ -119,5 +119,23 @@ namespace PokemonReviewApp.Controllers
 
         }
 
+        [HttpDelete("{categoryId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteCategory(int categoryId)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            bool saved = _categoryService.DeleteCategory(categoryId);
+            if (!saved)
+            {
+                ModelState.AddModelError("", "Something went wrong deleting the category");
+                return StatusCode(500, ModelState);
+            }
+            return NoContent();
+
+        }
+
     }
 }

@@ -26,6 +26,12 @@ namespace PokemonReviewApp.Repository
             return Save(); //Formally submit your DB Transaction
         }
 
+        public bool DeleteCategory(Category category)
+        {
+            _context.Remove(category);
+            return Save();
+        }
+
         public ICollection<Category> GetCategories()
         {
             //"Categories" itself is the whole table, now we simple turn that table into a list.

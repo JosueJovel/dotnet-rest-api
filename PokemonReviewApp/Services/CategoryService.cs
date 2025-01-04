@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PokemonReviewApp.Data;
 using PokemonReviewApp.Dto;
 using PokemonReviewApp.Interfaces;
 using PokemonReviewApp.Models;
@@ -10,11 +12,13 @@ namespace PokemonReviewApp.Services
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
+        private readonly DataContext _context;
 
-        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper) 
+        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper, DataContext context) 
         {
             this._categoryRepository = categoryRepository;
             this._mapper = mapper;
+            this._context = context;
         }
 
         public bool CategoryNameExists(CategoryDto categoryDto)
@@ -52,5 +56,15 @@ namespace PokemonReviewApp.Services
             
         }
 
+        public bool DeleteCategory(int categoryId)
+        {
+            if (_categoryRepository.CategoryExists(categoryId) == false) return false;
+            Category categoryToDelete = _context.Categories //Fetch relevant category along with all its dependencies
+                .Include(c => c.PokemonCategories)
+                .FirstOrDefault(c => c.Id == categoryId);
+            if (categoryToDelete.PokemonCategories.Any()) return false; //Do not delete categories with dependent data (delete dependencies first)
+            bool saved = _categoryRepository.DeleteCategory(categoryToDelete);
+            return saved;
+        }
     }
 }
